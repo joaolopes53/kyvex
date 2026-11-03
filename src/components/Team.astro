@@ -1,0 +1,160 @@
+---
+import { getCollection } from 'astro:content';
+
+const members = (await getCollection('team')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section class="team container" id="team" aria-labelledby="team-title">
+  <p class="label">The team</p>
+  <h2 class="team__title section-title" id="team-title" data-reveal-lines>A binary system.</h2>
+  <div class="team__layout">
+    <div class="orbit" aria-hidden="true">
+      <div class="orbit__ring"></div>
+      <div class="orbit__pair">
+        <span class="orbit__star orbit__star--blue"></span>
+        <span class="orbit__star orbit__star--violet"></span>
+      </div>
+    </div>
+    {
+      members.map((member) => (
+        <article class={`member member--${member.data.star}`} data-reveal-fade>
+          <p class="label">
+            <span class="member__dot" aria-hidden="true" />
+            {member.data.role}
+          </p>
+          <h3 class="item-title">{member.data.name}</h3>
+          <p class="member__bio">{member.data.bio}</p>
+        </article>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .team {
+    --star-blue: var(--color-accent);
+    --star-violet: #b59cff;
+    padding-block: var(--section-space);
+  }
+
+  .team__title {
+    margin: 1.5rem 0 4rem;
+  }
+
+  .team__layout {
+    display: grid;
+    gap: 3rem;
+    justify-items: center;
+  }
+
+  .orbit {
+    position: relative;
+    width: min(18rem, 70vw);
+    aspect-ratio: 1;
+  }
+
+  .orbit__ring {
+    position: absolute;
+    inset: 0;
+    border: 1px dashed var(--color-line);
+    border-radius: 50%;
+  }
+
+  .orbit__pair {
+    position: absolute;
+    inset: 0;
+    animation: orbit 14s linear infinite;
+  }
+
+  .orbit__star {
+    position: absolute;
+    top: 50%;
+    width: 1.25rem;
+    aspect-ratio: 1;
+    margin-top: -0.625rem;
+    border-radius: 50%;
+  }
+
+  .orbit__star--blue {
+    left: -0.625rem;
+    background: var(--star-blue);
+    box-shadow: 0 0 2rem 0.5rem color-mix(in srgb, var(--star-blue) 60%, transparent);
+  }
+
+  .orbit__star--violet {
+    right: -0.625rem;
+    background: var(--star-violet);
+    box-shadow: 0 0 2rem 0.5rem color-mix(in srgb, var(--star-violet) 60%, transparent);
+  }
+
+  @keyframes orbit {
+    to {
+      transform: rotate(1turn);
+    }
+  }
+
+  .member {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 24rem;
+    text-align: center;
+  }
+
+  .member .label {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .member__dot {
+    width: 0.5rem;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: var(--star-color);
+  }
+
+  .member--blue {
+    --star-color: var(--star-blue);
+  }
+
+  .member--violet {
+    --star-color: var(--star-violet);
+  }
+
+  .member__bio {
+    color: var(--color-muted);
+  }
+
+  @media (min-width: 900px) {
+    .team__layout {
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+
+    .member:first-of-type {
+      order: -1;
+      text-align: right;
+      justify-self: end;
+    }
+
+    .member:first-of-type .label {
+      justify-content: flex-end;
+    }
+
+    .member:last-of-type {
+      text-align: left;
+      justify-self: start;
+    }
+
+    .member:last-of-type .label {
+      justify-content: flex-start;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .orbit__pair {
+      animation: none;
+    }
+  }
+</style>

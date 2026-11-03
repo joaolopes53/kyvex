@@ -1,0 +1,18 @@
+[
+  {
+    "id": "joao",
+    "name": "João Rodrigues",
+    "role": "Software Developer",
+    "bio": "Placeholder bio. What João builds, what he cares about, and the kind of problems he likes to solve.",
+    "star": "blue",
+    "order": 1
+  },
+  {
+    "id": "diogo",
+    "name": "Diogo Gonçalves",
+    "role": "Software Developer",
+    "bio": "Placeholder bio. What Diogo builds, what he cares about, and the kind of problems he likes to solve.",
+    "star": "violet",
+    "order": 2
+  }
+]

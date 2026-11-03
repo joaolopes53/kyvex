@@ -1,0 +1,59 @@
+---
+const email = 'hello@example.com';
+const year = new Date().getFullYear();
+---
+
+<footer class="contact container" id="contact" data-finale aria-labelledby="contact-title">
+  <div class="contact__body">
+    <p class="label">Contact</p>
+    <h2 class="section-title" id="contact-title" data-reveal-lines>Have a project in mind?</h2>
+    <a class="contact__email" href={`mailto:${email}`}>{email}</a>
+  </div>
+  <div class="contact__meta label">
+    <span>&copy; {year} Kyvex | João Rodrigues and Diogo Gonçalves</span>
+    <a href="#top">Back to top</a>
+  </div>
+</footer>
+
+<style>
+  /* The stars form the Kyvex wordmark in the upper half of this viewport, so the copy sits below it. */
+  .contact {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 100svh;
+    padding-top: 55svh;
+    padding-bottom: 2rem;
+  }
+
+  .contact__body {
+    display: grid;
+    align-content: start;
+    gap: 1.5rem;
+  }
+
+  .contact__email {
+    justify-self: start;
+    font-size: var(--text-lead);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+    transition: color 0.3s var(--ease-out);
+  }
+
+  .contact__email:hover {
+    color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .contact {
+      padding-top: var(--section-space);
+    }
+  }
+
+  .contact__meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+import { getCollection } from 'astro:content';
+
+const roles = (await getCollection('experience')).sort((a, b) => a.data.order - b.data.order);
+---
+
+<section class="experience container" id="experience" aria-labelledby="experience-title">
+  <p class="label">Experience</p>
+  <h2 class="experience__title section-title" id="experience-title" data-reveal-lines>Where we have been.</h2>
+  <ol class="experience__list">
+    {
+      roles.map((role) => (
+        <li class="experience__row" data-reveal-fade>
+          <span class="label">{role.data.period}</span>
+          <span class="experience__company">{role.data.company}</span>
+          <span class="experience__role">{role.data.role}</span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .experience {
+    padding-block: var(--section-space);
+  }
+
+  .experience__title {
+    margin: 1.5rem 0 3rem;
+  }
+
+  .experience__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-line);
+  }
+
+  .experience__row {
+    display: grid;
+    gap: 0.25rem;
+    padding: 1.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-line);
+    transition:
+      background-color 0.3s var(--ease-out),
+      color 0.3s var(--ease-out);
+  }
+
+  .experience__row:hover {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+
+  .experience__row:hover .label {
+    color: inherit;
+  }
+
+  .experience__company {
+    font-size: var(--text-lead);
+    font-family: var(--font-display);
+    line-height: 1.1;
+  }
+
+  .experience__role {
+    color: inherit;
+    opacity: 0.7;
+  }
+
+  @media (min-width: 900px) {
+    .experience__row {
+      grid-template-columns: 12rem 1fr auto;
+      align-items: baseline;
+      gap: 2rem;
+    }
+  }
+</style>

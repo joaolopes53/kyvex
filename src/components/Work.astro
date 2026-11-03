@@ -1,0 +1,170 @@
+---
+import { getCollection } from 'astro:content';
+
+const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
+const planetHues = [205, 230, 190, 255];
+---
+
+<section class="work" id="work" data-work aria-labelledby="work-title">
+  <div class="work__viewport">
+    <div class="work__track" data-work-track>
+      <header class="work__intro">
+        <p class="label">Selected work</p>
+        <h2 class="work__title section-title" id="work-title" data-reveal-lines>Worlds we have built.</h2>
+      </header>
+      {
+        projects.map((project, index) => (
+          <article class="card" style={`--hue: ${planetHues[index % planetHues.length]}`}>
+            <div class="card__visual" data-card-visual aria-hidden="true">
+              <span class="planet">
+                <span class="planet__ring" />
+              </span>
+            </div>
+            <div class="card__body">
+              <p class="label">
+                {String(index + 1).padStart(2, '0')} | {project.data.client} | {project.data.year}
+              </p>
+              <h3 class="item-title">{project.data.title}</h3>
+              <p class="card__summary">{project.data.summary}</p>
+              <ul class="card__stack" aria-label="Stack">
+                {project.data.stack.map((tech) => (
+                  <li>{tech}</li>
+                ))}
+              </ul>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .work {
+    padding-block: var(--section-space);
+  }
+
+  .work__track {
+    display: grid;
+    gap: 3rem;
+    padding-inline: var(--gutter);
+  }
+
+  .work__title {
+    margin-top: 1.5rem;
+  }
+
+  .card {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .card__visual {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius);
+    background:
+      radial-gradient(60% 60% at 50% 50%, hsl(var(--hue) 80% 60% / 0.12), transparent 70%),
+      color-mix(in srgb, var(--color-surface) 70%, transparent);
+    overflow: hidden;
+  }
+
+  .planet {
+    position: relative;
+    width: 42%;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background:
+      radial-gradient(circle at 30% 28%, hsl(var(--hue) 90% 85%), hsl(var(--hue) 70% 45%) 45%, hsl(var(--hue) 60% 12%) 100%);
+    box-shadow: 0 0 4rem hsl(var(--hue) 80% 55% / 0.35);
+    transition: transform 0.8s var(--ease-out);
+  }
+
+  .planet__ring {
+    position: absolute;
+    inset: 38% -38%;
+    border: 2px solid hsl(var(--hue) 80% 80% / 0.5);
+    border-radius: 50%;
+    transform: rotate(-16deg);
+  }
+
+  .card:hover .planet {
+    transform: scale(1.08) rotate(-6deg);
+  }
+
+  .card__body {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .card__summary {
+    color: var(--color-muted);
+    max-width: 28rem;
+  }
+
+  .card__stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: var(--text-label);
+  }
+
+  .card__stack li {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--color-line);
+    border-radius: 2rem;
+  }
+
+  /* The horizontal strip exists only while its pin runs, so every card stays reachable without it. */
+  :global(.is-horizontal) .work {
+    padding-block: 0;
+  }
+
+  :global(.is-horizontal) .work__viewport {
+    overflow: clip;
+  }
+
+  :global(.is-horizontal) .work__track {
+    display: flex;
+    align-items: center;
+    gap: clamp(2rem, 4vw, 5rem);
+    width: max-content;
+    height: 100svh;
+  }
+
+  :global(.is-horizontal) .work__intro {
+    width: min(30rem, 35vw);
+  }
+
+  /* 70svh keeps a 16:10 visual plus the card text inside one viewport height. */
+  :global(.is-horizontal) .card {
+    width: min(34rem, 38vw, 70svh);
+  }
+
+  :global(.is-horizontal) .card__visual {
+    aspect-ratio: 16 / 10;
+  }
+
+  @media (min-width: 900px) {
+    .work__track {
+      grid-template-columns: repeat(2, 1fr);
+      column-gap: clamp(2rem, 4vw, 5rem);
+    }
+
+    .work__intro {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .planet {
+      transition: none;
+    }
+  }
+</style>

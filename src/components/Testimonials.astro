@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content';
+
+const testimonials = await getCollection('testimonials');
+---
+
+<section class="testimonials container" aria-labelledby="testimonials-title">
+  <h2 class="label" id="testimonials-title">What clients say</h2>
+  <div class="testimonials__list">
+    {
+      testimonials.map((item) => (
+        <figure class="quote" data-reveal-fade>
+          <blockquote class="quote__text display-lead">
+            <p>&ldquo;{item.data.quote}&rdquo;</p>
+          </blockquote>
+          <figcaption class="label">
+            {item.data.author} | {item.data.role}
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .testimonials {
+    padding-block: var(--section-space);
+  }
+
+  .testimonials h2 {
+    margin: 0;
+    font-weight: 400;
+  }
+
+  .testimonials__list {
+    display: grid;
+    gap: clamp(4rem, 10vw, 9rem);
+    margin-top: 3rem;
+  }
+
+  .quote {
+    display: grid;
+    gap: 1.5rem;
+    max-width: 60rem;
+  }
+
+  .quote:nth-child(even) {
+    justify-self: end;
+    text-align: right;
+  }
+
+  .quote__text {
+    margin: 0;
+  }
+</style>

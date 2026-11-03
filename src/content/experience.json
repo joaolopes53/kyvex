@@ -1,0 +1,5 @@
+[
+  { "id": "now", "period": "2024 - now", "company": "Independent", "role": "Software Developer", "order": 1 },
+  { "id": "b", "period": "2021 - 2024", "company": "Placeholder Company", "role": "Full-stack Developer", "order": 2 },
+  { "id": "c", "period": "2019 - 2021", "company": "Placeholder Studio", "role": "Frontend Developer", "order": 3 }
+]

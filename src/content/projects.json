@@ -1,0 +1,38 @@
+[
+  {
+    "id": "atlas",
+    "title": "Atlas",
+    "client": "Placeholder Logistics",
+    "year": 2026,
+    "summary": "Real-time fleet dashboard that cut dispatch time by a third.",
+    "stack": ["React", "TypeScript", "PostgreSQL"],
+    "order": 1
+  },
+  {
+    "id": "ledger",
+    "title": "Ledger API",
+    "client": "Placeholder Finance",
+    "year": 2025,
+    "summary": "Payments API serving two million requests a day with zero downtime releases.",
+    "stack": ["Python", "Django", "Redis"],
+    "order": 2
+  },
+  {
+    "id": "harbor",
+    "title": "Harbor",
+    "client": "Placeholder Hotels",
+    "year": 2025,
+    "summary": "Booking platform rebuilt from scratch, now loading in under a second.",
+    "stack": ["Astro", "Node.js", "Docker"],
+    "order": 3
+  },
+  {
+    "id": "pulse",
+    "title": "Pulse",
+    "client": "Placeholder Health",
+    "year": 2024,
+    "summary": "Internal tool that replaced four spreadsheets and a weekly meeting.",
+    "stack": ["Next.js", "Prisma", "Azure"],
+    "order": 4
+  }
+]

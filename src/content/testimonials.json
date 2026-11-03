@@ -1,0 +1,20 @@
+[
+  {
+    "id": "client-a",
+    "quote": "They understood the problem before we finished explaining it, and shipped a week early.",
+    "author": "Placeholder Name",
+    "role": "CTO, Placeholder Logistics"
+  },
+  {
+    "id": "client-b",
+    "quote": "The cleanest handover we have ever received. Our team took it over on day one.",
+    "author": "Placeholder Name",
+    "role": "Head of Product, Placeholder Finance"
+  },
+  {
+    "id": "client-c",
+    "quote": "Fast, honest about trade-offs, and obsessive about the details our guests notice.",
+    "author": "Placeholder Name",
+    "role": "Director, Placeholder Hotels"
+  }
+]
