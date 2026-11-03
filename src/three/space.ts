@@ -3,6 +3,7 @@ import {
   BufferGeometry,
   DoubleSide,
   MathUtils,
+  Matrix4,
   Mesh,
   PerspectiveCamera,
   PlaneGeometry,
@@ -56,7 +57,16 @@ const METEOR_GAP_MAX = 8;
 
 const BAND_NORMAL = new Vector3(0.25, 0.9, 0.35).normalize();
 const BAND_ROTATION = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), BAND_NORMAL);
-const WORD_COLOUR = new Vector3(0x8d / 255, 0xb8 / 255, 1);
+const WORD_COLOUR = rgb(0x8db8ff);
+// The wordmark stars start as a spiral galaxy beyond the end of the flight, tilted towards the camera.
+const GALAXY_RADIUS = 6;
+const GALAXY_ARMS = 3;
+const GALAXY_SPIN = 1.1;
+const GALAXY_TILT = 1;
+const GALAXY_CENTRE = new Vector3(0, 0, -TRAVEL - WORD_DISTANCE - 4);
+const GALAXY_CORE = rgb(0xfff4ea);
+const GALAXY_ARM = rgb(0xaabfff);
+const GALAXY_EDGE = rgb(0x6fa8ff);
 
 // Stellar class colours (O to M) with weights tilted towards the white and yellow stars the eye sees most.
 const STAR_TYPES: ReadonlyArray<readonly [number, number]> = [
@@ -69,6 +79,11 @@ const STAR_TYPES: ReadonlyArray<readonly [number, number]> = [
   [0.08, 0xffcc6f],
 ];
 
+// Colours stay as raw display values: the shaders write them straight to an sRGB canvas without conversion.
+function rgb(hex: number): Vector3 {
+  return new Vector3(((hex >> 16) & 0xff) / 255, ((hex >> 8) & 0xff) / 255, (hex & 0xff) / 255);
+}
+
 function starColour(out: Float32Array, offset: number): void {
   let pick = Math.random();
   let hex = STAR_TYPES[STAR_TYPES.length - 1][1];
@@ -79,7 +94,7 @@ function starColour(out: Float32Array, offset: number): void {
     }
     pick -= weight;
   }
-  out.set([((hex >> 16) & 0xff) / 255, ((hex >> 8) & 0xff) / 255, (hex & 0xff) / 255], offset);
+  rgb(hex).toArray(out, offset);
 }
 
 function wordmarkPoints(count: number): Float32Array {
@@ -117,6 +132,22 @@ function wordmarkPoints(count: number): Float32Array {
   return positions;
 }
 
+// Writes a galaxy star in the disk's local frame (y is the disk normal); the shader spins and places the disk.
+function galaxyStar(index: number, positions: Float32Array, colours: Float32Array): void {
+  const radius = Math.random() ** 1.6 * GALAXY_RADIUS;
+  const angle = ((index % GALAXY_ARMS) / GALAXY_ARMS) * Math.PI * 2 + radius * GALAXY_SPIN;
+  const scatter = (): number => (Math.random() - 0.5) * Math.random() ** 2.5 * (0.4 + radius * 0.35);
+  positions.set(
+    [Math.cos(angle) * radius + scatter(), scatter() * 0.35, Math.sin(angle) * radius + scatter()],
+    index * 3,
+  );
+
+  const t = radius / GALAXY_RADIUS;
+  const colour = GALAXY_CORE.clone().lerp(GALAXY_ARM, Math.min(1, t * 2.2));
+  if (t > 0.45) colour.lerp(GALAXY_EDGE, (t - 0.45) / 0.55);
+  colour.toArray(colours, index * 3);
+}
+
 function fieldGeometry(count: number, wordCount: number): BufferGeometry {
   const positions = new Float32Array(count * 3);
   const colours = new Float32Array(count * 3);
@@ -124,6 +155,12 @@ function fieldGeometry(count: number, wordCount: number): BufferGeometry {
   const word = new Float32Array(count);
 
   for (let i = 0; i < count; i++) {
+    word[i] = i < wordCount ? 1 : 0;
+    if (i < wordCount) {
+      galaxyStar(i, positions, colours);
+      sizes[i] = 0.6 + Math.random() * 0.8;
+      continue;
+    }
     positions.set(
       [(Math.random() * 2 - 1) * FIELD_SPREAD, (Math.random() * 2 - 1) * FIELD_SPREAD, 20 - Math.random() * FIELD_DEPTH],
       i * 3,
@@ -131,7 +168,6 @@ function fieldGeometry(count: number, wordCount: number): BufferGeometry {
     starColour(colours, i * 3);
     // A steep power curve keeps most stars faint, with a rare bright one.
     sizes[i] = 0.7 + Math.random() ** 10 * 7;
-    word[i] = i < wordCount ? 1 : 0;
   }
 
   const geometry = new BufferGeometry();
@@ -208,6 +244,7 @@ export function mountSpace({ canvas, onLost }: SpaceOptions): SpaceScene | null 
     uWordScale: { value: 1 },
     uWordOrigin: { value: new Vector3() },
     uWordColor: { value: WORD_COLOUR },
+    uGalaxy: { value: new Matrix4().makeRotationX(GALAXY_TILT).setPosition(GALAXY_CENTRE) },
   };
   const meteorUniforms = {
     uMeteor: { value: new Vector4(0, 0, 0, 0) },
@@ -216,7 +253,7 @@ export function mountSpace({ canvas, onLost }: SpaceOptions): SpaceScene | null 
   };
 
   const field = new Points(
-    fieldGeometry(wide ? 26000 : 11000, wide ? 9000 : 4000),
+    fieldGeometry(wide ? 30000 : 13000, wide ? 13000 : 5000),
     additiveMaterial(starsVertex, starFragment, starUniforms),
   );
   const sky = new Points(

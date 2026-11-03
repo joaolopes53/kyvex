@@ -5,6 +5,7 @@ uniform float uMorph;
 uniform float uWordScale;
 uniform vec3 uWordOrigin;
 uniform vec3 uWordColor;
+uniform mat4 uGalaxy;
 
 attribute vec3 aColor;
 attribute vec3 aTarget;
@@ -17,11 +18,17 @@ varying float vAlpha;
 varying float vHalo;
 
 void main() {
+  // Word stars are stored in the galaxy's local frame; inner stars orbit faster, which keeps the arms winding.
+  float radius = length(position.xz);
+  float angle = uTime * 0.18 / (0.35 + radius);
+  vec3 orbit = vec3(cos(angle) * position.x - sin(angle) * position.z, position.y, sin(angle) * position.x + cos(angle) * position.z);
+  vec3 start = mix(position, (uGalaxy * vec4(orbit, 1.0)).xyz, aWord);
+
   // Each word star starts its flight at a different moment, so the letters assemble instead of snapping.
   float morph = aWord * smoothstep(0.0, 1.0, clamp(uMorph * 1.6 - aRandom * 0.6, 0.0, 1.0));
   vec3 word = uWordOrigin + aTarget * uWordScale;
   word.xy += vec2(sin(uTime + aRandom * 20.0), cos(uTime * 0.8 + aRandom * 14.0)) * 0.03;
-  vec4 viewPosition = modelViewMatrix * vec4(mix(position, word, morph), 1.0);
+  vec4 viewPosition = modelViewMatrix * vec4(mix(start, word, morph), 1.0);
   gl_Position = projectionMatrix * viewPosition;
 
   float depth = max(-viewPosition.z, 0.001);

@@ -36,7 +36,7 @@ Tokens live in `src/styles/global.css` as CSS custom properties. Components refe
 
 ## North star
 
-A customer-facing studio portfolio. One scroll-driven flight through a realistic black night sky: content floats over a fixed WebGL starfield, and the page ends with the stars forming the KYVEX wordmark above the contact block.
+A customer-facing studio portfolio. One scroll-driven flight through a realistic black night sky: content floats over a fixed WebGL starfield, and the flight ends at a spinning spiral galaxy whose stars unwind to form the KYVEX wordmark above the contact block.
 
 ## Background scene
 
