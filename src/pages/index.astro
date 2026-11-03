@@ -17,7 +17,6 @@ import Cursor from '../components/Cursor.astro';
 >
   <canvas class="space" data-space aria-hidden="true"></canvas>
   <div class="space-fallback" aria-hidden="true"></div>
-  <div class="constellation-labels" data-constellation-labels aria-hidden="true"></div>
   <Header />
   <main id="main">
     <Hero />
@@ -38,8 +37,7 @@ import Cursor from '../components/Cursor.astro';
 
   const markNoWebgl = (): void => document.documentElement.classList.add('no-webgl');
   const canvas = document.querySelector<HTMLCanvasElement>('[data-space]');
-  const labels = document.querySelector<HTMLElement>('[data-constellation-labels]');
-  const space = canvas ? mountSpace({ canvas, labels, onLost: markNoWebgl }) : null;
+  const space = canvas ? mountSpace({ canvas, onLost: markNoWebgl }) : null;
   if (!space) markNoWebgl();
 
   initMotion({

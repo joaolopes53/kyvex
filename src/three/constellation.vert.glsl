@@ -20,9 +20,9 @@ void main() {
   float depth = max(-viewPosition.z, 0.001);
   float fade = smoothstep(uFade.x, uFade.y, depth) * (1.0 - smoothstep(uFade.z, uFade.w, depth));
 
-  gl_PointSize = (4.0 + aSize * 2.0 + aGlow * 6.0) * uPixelRatio * clamp(30.0 / depth, 0.6, 2.0);
+  gl_PointSize = (5.0 + aSize * 2.0 + aGlow * 6.0) * uPixelRatio * clamp(30.0 / depth, 0.6, 2.0);
   float twinkle = 0.85 + 0.15 * sin(uTime * (1.2 + aRandom * 2.0) + aRandom * 40.0);
   vColor = mix(IDLE_COLOUR, LIT_COLOUR, aGlow);
-  vAlpha = (0.7 + 0.6 * aGlow) * twinkle * fade;
+  vAlpha = (1.0 + 0.5 * aGlow) * twinkle * fade;
   vHalo = 0.6 + 0.4 * aGlow;
 }

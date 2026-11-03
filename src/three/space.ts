@@ -1,29 +1,26 @@
 import {
   BufferAttribute,
   BufferGeometry,
-  type IUniform,
+  DoubleSide,
   MathUtils,
   Mesh,
-  OrthographicCamera,
   PerspectiveCamera,
   PlaneGeometry,
   Points,
   Quaternion,
   Scene,
-  ShaderMaterial,
+  type ShaderMaterial,
   Vector2,
   Vector3,
   Vector4,
-  WebGLRenderTarget,
   WebGLRenderer,
 } from 'three';
 
 import { REDUCED_MOTION, WIDE } from '../motion/media';
 import { createConstellations } from './constellations';
-import compositeFragment from './composite.frag.glsl?raw';
-import fullscreenVertex from './fullscreen.vert.glsl?raw';
 import { additiveMaterial } from './materials';
-import nebulaFragment from './nebula.frag.glsl?raw';
+import meteorFragment from './meteor.frag.glsl?raw';
+import meteorVertex from './meteor.vert.glsl?raw';
 import { gaussian, randoms } from './random';
 import skyVertex from './sky.vert.glsl?raw';
 import starFragment from './star.frag.glsl?raw';
@@ -47,14 +44,15 @@ const WORD_DISTANCE = 14;
 // Share of the half view height the wordmark sits above centre, leaving room for the contact copy.
 const WORD_LIFT = 0.36;
 const SKY_RADIUS = 500;
+// Share of the remaining distance eased per 60 Hz frame; scaled by real frame time so motion is rate independent.
 const EASING = 0.06;
 // Share of full brightness kept behind page copy, so text stays readable.
 const CONTENT_INTENSITY = 0.55;
-// The nebula is soft, so it renders at half the CSS size and scales up.
-const NEBULA_SCALE = 0.5;
+// Matches --color-bg in global.css.
+const BACKGROUND = 0x030304;
 const METEOR_LIFE = 1.2;
-const METEOR_GAP_MIN = 6;
-const METEOR_GAP_MAX = 14;
+const METEOR_GAP_MIN = 3;
+const METEOR_GAP_MAX = 8;
 
 const BAND_NORMAL = new Vector3(0.25, 0.9, 0.35).normalize();
 const BAND_ROTATION = new Quaternion().setFromUnitVectors(new Vector3(0, 1, 0), BAND_NORMAL);
@@ -70,12 +68,6 @@ const STAR_TYPES: ReadonlyArray<readonly [number, number]> = [
   [0.14, 0xffd2a1],
   [0.08, 0xffcc6f],
 ];
-
-const COPY_FRAGMENT = `
-uniform sampler2D uTexture;
-varying vec2 vUv;
-void main() { gl_FragColor = texture2D(uTexture, vUv); }
-`;
 
 function starColour(out: Float32Array, offset: number): void {
   let pick = Math.random();
@@ -181,12 +173,6 @@ function skyGeometry(count: number): BufferGeometry {
   return geometry;
 }
 
-function fullscreenQuad(material: ShaderMaterial): Mesh {
-  const mesh = new Mesh(new PlaneGeometry(2, 2), material);
-  mesh.frustumCulled = false;
-  return mesh;
-}
-
 function createRenderer(canvas: HTMLCanvasElement): WebGLRenderer | null {
   try {
     return new WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
@@ -197,11 +183,10 @@ function createRenderer(canvas: HTMLCanvasElement): WebGLRenderer | null {
 
 export interface SpaceOptions {
   canvas: HTMLCanvasElement;
-  labels: HTMLElement | null;
   onLost: () => void;
 }
 
-export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene | null {
+export function mountSpace({ canvas, onLost }: SpaceOptions): SpaceScene | null {
   const renderer = createRenderer(canvas);
   if (!renderer) return null;
 
@@ -209,9 +194,7 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
   const wide = window.matchMedia(WIDE).matches;
   const camera = new PerspectiveCamera(CAMERA_FOV, 1, 0.1, SKY_RADIUS * 2);
   camera.rotation.order = 'YXZ';
-  const quadCamera = new OrthographicCamera(-1, 1, 1, -1, 0, 1);
-  const nebulaTarget = new WebGLRenderTarget(1, 1, { depthBuffer: false });
-  const sceneTarget = new WebGLRenderTarget(1, 1, { depthBuffer: false });
+  renderer.setClearColor(BACKGROUND);
 
   const time = { value: 0 };
   const pixelRatio = { value: 1 };
@@ -226,21 +209,11 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
     uWordOrigin: { value: new Vector3() },
     uWordColor: { value: WORD_COLOUR },
   };
-  const nebulaUniforms = {
-    uCameraWorld: { value: camera.matrixWorld },
-    uInverseProjection: { value: camera.projectionMatrixInverse },
-    uBandNormal: { value: BAND_NORMAL },
-    uDrift: { value: 0 },
-    uIntensity: intensity,
-  };
-  const compositeUniforms = {
-    uScene: { value: sceneTarget.texture },
+  const meteorUniforms = {
+    uMeteor: { value: new Vector4(0, 0, 0, 0) },
     uAspect: { value: 1 },
-    uMeteor: { value: new Vector4(0, 0, 0, -1) },
+    uLife: { value: 0 },
   };
-
-  const quadMaterial = (fragmentShader: string, uniforms: Record<string, IUniform>): ShaderMaterial =>
-    new ShaderMaterial({ uniforms, vertexShader: fullscreenVertex, fragmentShader, depthTest: false, depthWrite: false });
 
   const field = new Points(
     fieldGeometry(wide ? 26000 : 11000, wide ? 9000 : 4000),
@@ -250,17 +223,18 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
     skyGeometry(wide ? 14000 : 6000),
     additiveMaterial(skyVertex, starFragment, { uTime: time, uPixelRatio: pixelRatio, uIntensity: intensity, uSize: { value: 1.1 } }),
   );
-  const backdrop = fullscreenQuad(quadMaterial(COPY_FRAGMENT, { uTexture: { value: nebulaTarget.texture } }));
-  // Word stars fly outside their initial bounds, so culling by bounding sphere would drop them.
+  const meteor = new Mesh(new PlaneGeometry(1, 1), additiveMaterial(meteorVertex, meteorFragment, meteorUniforms));
+  // Word stars fly outside their initial bounds and the meteor is placed in clip space, so neither may be culled.
   field.frustumCulled = false;
   sky.frustumCulled = false;
-  backdrop.renderOrder = -1;
+  meteor.frustumCulled = false;
+  // The vertex shader lays the quad tail-first along the heading, which mirrors it, so the back face is the visible one.
+  meteor.material.side = DoubleSide;
+  meteor.visible = false;
 
-  const constellations = createConstellations({ uTime: time, uPixelRatio: pixelRatio, uIntensity: intensity }, labels);
+  const constellations = createConstellations({ uTime: time, uPixelRatio: pixelRatio, uIntensity: intensity });
   const scene = new Scene();
-  scene.add(backdrop, sky, field, constellations.group);
-  const nebulaScene = new Scene().add(fullscreenQuad(quadMaterial(nebulaFragment, nebulaUniforms)));
-  const compositeScene = new Scene().add(fullscreenQuad(quadMaterial(compositeFragment, compositeUniforms)));
+  scene.add(sky, field, constellations.group, meteor);
 
   const target = { hero: 0, journey: 0, finale: 0 };
   const current = { hero: 0, journey: 0, finale: 0 };
@@ -269,7 +243,8 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
   const pointerPixels = new Vector2();
   let pointerInside = false;
   let meteorStart = 0;
-  let nextMeteor = 3 + Math.random() * 4;
+  let nextMeteor = 1.5 + Math.random() * 1.5;
+  let previousSeconds: number | null = null;
   let running = false;
 
   const placeCamera = (): void => {
@@ -283,7 +258,6 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
     sky.position.copy(camera.position);
 
     starUniforms.uMorph.value = current.finale;
-    nebulaUniforms.uDrift.value = current.journey * 0.15 + time.value * 0.003;
     const contentIntensity = 1 - (1 - CONTENT_INTENSITY) * hero;
     const finaleGlow = MathUtils.smoothstep(finale, 0.6, 1);
     intensity.value = contentIntensity + (1 - contentIntensity) * finaleGlow;
@@ -292,39 +266,39 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
   const render = (): void => {
     placeCamera();
     constellations.update(camera, pointerInside ? pointerPixels : null, time.value, canvas.clientWidth, canvas.clientHeight);
-    renderer.setRenderTarget(nebulaTarget);
-    renderer.render(nebulaScene, quadCamera);
-    renderer.setRenderTarget(sceneTarget);
     renderer.render(scene, camera);
-    renderer.setRenderTarget(null);
-    renderer.render(compositeScene, quadCamera);
   };
 
   const updateMeteor = (seconds: number): void => {
-    const meteor = compositeUniforms.uMeteor.value;
-    if (meteor.w < 0 && seconds >= nextMeteor) {
-      const startX = (Math.random() * 2 - 1) * compositeUniforms.uAspect.value * 0.8;
+    const path = meteorUniforms.uMeteor.value;
+    if (!meteor.visible && seconds >= nextMeteor) {
+      const startX = (Math.random() * 2 - 1) * meteorUniforms.uAspect.value * 0.8;
       const tilt = Math.PI * (0.12 + Math.random() * 0.2);
-      meteor.set(startX, 0.3 + Math.random() * 0.6, startX > 0 ? -Math.PI + tilt : -tilt, 0);
+      path.set(startX, 0.3 + Math.random() * 0.6, startX > 0 ? -Math.PI + tilt : -tilt, 0);
       meteorStart = seconds;
+      meteor.visible = true;
     }
-    if (meteor.w < 0) return;
+    if (!meteor.visible) return;
     const progress = (seconds - meteorStart) / METEOR_LIFE;
     if (progress < 1) {
-      meteor.w = progress;
+      path.w = progress;
+      meteorUniforms.uLife.value = Math.sin(Math.PI * progress);
       return;
     }
-    meteor.w = -1;
+    meteor.visible = false;
     nextMeteor = seconds + METEOR_GAP_MIN + Math.random() * (METEOR_GAP_MAX - METEOR_GAP_MIN);
   };
 
   const tick = (timestamp: number): void => {
     const seconds = timestamp / 1000;
+    const frames = previousSeconds === null ? 1 : Math.min(4, (seconds - previousSeconds) * 60);
+    const easing = 1 - (1 - EASING) ** frames;
+    previousSeconds = seconds;
     time.value = seconds;
-    pointer.lerp(pointerTarget, EASING);
-    current.hero += (target.hero - current.hero) * EASING;
-    current.journey += (target.journey - current.journey) * EASING;
-    current.finale += (target.finale - current.finale) * EASING;
+    pointer.lerp(pointerTarget, easing);
+    current.hero += (target.hero - current.hero) * easing;
+    current.journey += (target.journey - current.journey) * easing;
+    current.finale += (target.finale - current.finale) * easing;
     updateMeteor(seconds);
     render();
   };
@@ -335,15 +309,13 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
     const ratio = Math.min(window.devicePixelRatio, 2);
     renderer.setPixelRatio(ratio);
     renderer.setSize(width, height, false);
-    sceneTarget.setSize(Math.round(width * ratio), Math.round(height * ratio));
-    nebulaTarget.setSize(Math.ceil(width * NEBULA_SCALE), Math.ceil(height * NEBULA_SCALE));
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
 
     const halfHeight = Math.tan(((CAMERA_FOV / 2) * Math.PI) / 180) * WORD_DISTANCE;
     starUniforms.uWordScale.value = Math.min(2, (halfHeight * camera.aspect * 2 * 0.85) / WORDMARK_WIDTH);
     starUniforms.uWordOrigin.value.set(0, halfHeight * WORD_LIFT, -TRAVEL - WORD_DISTANCE);
-    compositeUniforms.uAspect.value = camera.aspect;
+    meteorUniforms.uAspect.value = camera.aspect;
     pixelRatio.value = ratio;
     if (!running) render();
   };
@@ -379,7 +351,8 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
     Object.assign(current, target);
     pointer.set(0, 0);
     pointerInside = false;
-    compositeUniforms.uMeteor.value.w = -1;
+    meteor.visible = false;
+    previousSeconds = null;
     render();
   };
 
@@ -424,16 +397,11 @@ export function mountSpace({ canvas, labels, onLost }: SpaceOptions): SpaceScene
       resolutionQuery.removeEventListener('change', onResolutionChange);
       canvas.removeEventListener('webglcontextlost', onContextLost);
       listenToPointer(false);
-      for (const root of [scene, nebulaScene, compositeScene]) {
-        root.traverse((object) => {
-          if (!(object instanceof Mesh || object instanceof Points)) return;
-          object.geometry.dispose();
-          (object.material as ShaderMaterial).dispose();
-        });
+      for (const object of [sky, field, meteor]) {
+        object.geometry.dispose();
+        (object.material as ShaderMaterial).dispose();
       }
       constellations.dispose();
-      nebulaTarget.dispose();
-      sceneTarget.dispose();
       renderer.dispose();
     },
   };

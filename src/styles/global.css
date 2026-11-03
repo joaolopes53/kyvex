@@ -7,8 +7,8 @@
   --color-accent: #8db8ff;
   --color-on-accent: #030304;
 
-  --font-display: 'Instrument Serif', Georgia, serif;
-  --font-body: 'Inter Tight', system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
   --text-label: 0.75rem;
@@ -16,7 +16,7 @@
   --text-lead: clamp(1.5rem, 1.1rem + 1.6vw, 2.5rem);
   --text-title: clamp(2.5rem, 1.5rem + 4vw, 5rem);
   --text-heading: clamp(2rem, 1.5rem + 2vw, 3.25rem);
-  --text-display: clamp(3.5rem, 1rem + 10vw, 11rem);
+  --text-display: clamp(3rem, 1rem + 7vw, 8.5rem);
 
   --gutter: clamp(1rem, 0.5rem + 2vw, 2.5rem);
   --section-space: clamp(6rem, 4rem + 10vw, 14rem);
@@ -142,29 +142,7 @@ a {
   background: var(--color-bg);
 }
 
-.constellation-labels {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.constellation-label {
-  position: absolute;
-  top: 0;
-  left: 0;
-  font-family: var(--font-mono);
-  font-size: var(--text-label);
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--color-accent);
-  opacity: 0;
-}
-
-.no-webgl .space,
-.no-webgl .constellation-labels {
+.no-webgl .space {
   display: none;
 }
 
