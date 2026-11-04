@@ -32,7 +32,7 @@ tokens:
 
 # Kyvex design contract
 
-Tokens live in `src/styles/global.css` as CSS custom properties. Components reference them and do not define colours or type sizes of their own. Two decorative exceptions: the violet companion star in Team (`#b59cff`) and the per-project planet hues in Work.
+Tokens live in `src/styles/global.css` as CSS custom properties. Components reference them and do not define colours or type sizes of their own. The violet companion star in Team (`#b59cff`) is a decorative exception.
 
 ## North star
 
@@ -54,8 +54,9 @@ A customer-facing studio portfolio. One scroll-driven flight through a realistic
 | Component | Pattern |
 |---|---|
 | Header | Fixed, mono uppercase labels, underline grows on hover |
-| Hero | Sticky block, display headline with an italic accent word |
-| Work | Pinned horizontal strip at 900 x 600 px and above with normal motion preferences, stacked grid otherwise; CSS planet visual per project |
+| Loading screen | Full-screen dark field with the official Kyvex logo lockup and standalone K favicon, short progress sweep and soft exit; hidden when reduced motion is requested |
+| Hero | Sticky, viewport-centred block; label, masked headline lines and lead enter in one restrained stagger |
+| Work | Pinned horizontal strip at 900 x 600 px and above with normal motion preferences, stacked grid otherwise; linked project cards with local screenshots of each website |
 | Team | Binary-star orbit between two member columns |
 | Experience | Rows that fill with the accent on hover |
 | Testimonials | Alternating left and right quotes |

@@ -1,0 +1,106 @@
+<div class="loading-screen" aria-hidden="true">
+  <div class="loading-screen__content">
+    <div class="loading-screen__brand">
+      <img class="loading-screen__logo" src="/kyvex-logo.png" alt="" />
+    </div>
+    <div class="loading-screen__track">
+      <span class="loading-screen__progress"></span>
+    </div>
+    <span class="loading-screen__caption label">Software studio</span>
+  </div>
+</div>
+
+<style>
+  .loading-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: grid;
+    place-items: center;
+    background: var(--color-bg);
+    animation: loading-screen-exit 0.55s var(--ease-out) 1.3s forwards;
+  }
+
+  .loading-screen__content {
+    display: grid;
+    justify-items: center;
+  }
+
+  .loading-screen__brand {
+    display: flex;
+    align-items: center;
+    opacity: 0;
+    transform: translateY(0.5rem);
+    animation: loading-screen-brand 0.75s var(--ease-out) 0.05s forwards;
+  }
+
+  .loading-screen__logo {
+    display: block;
+    width: min(82vw, 38rem);
+    height: auto;
+  }
+
+  .loading-screen__track {
+    width: clamp(9rem, 18vw, 14rem);
+    height: 1px;
+    margin-top: 2rem;
+    overflow: hidden;
+    background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+
+  .loading-screen__progress {
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: var(--color-accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: loading-screen-progress 1.05s var(--ease-out) 0.1s forwards;
+  }
+
+  .loading-screen__caption {
+    margin-top: 1rem;
+    opacity: 0;
+    animation: loading-screen-caption 0.45s var(--ease-out) 0.45s forwards;
+  }
+
+  @keyframes loading-screen-brand {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes loading-screen-progress {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  @keyframes loading-screen-caption {
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes loading-screen-exit {
+    to {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-screen {
+      display: none;
+      animation: none;
+    }
+
+    .loading-screen__brand,
+    .loading-screen__progress,
+    .loading-screen__caption {
+      animation: none;
+    }
+  }
+</style>

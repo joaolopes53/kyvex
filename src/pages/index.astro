@@ -9,12 +9,14 @@ import Experience from '../components/Experience.astro';
 import Testimonials from '../components/Testimonials.astro';
 import Contact from '../components/Contact.astro';
 import Cursor from '../components/Cursor.astro';
+import LoadingScreen from '../components/LoadingScreen.astro';
 ---
 
 <Base
   title="Kyvex | Software studio"
   description="João Rodrigues and Diogo Gonçalves design and build web platforms, APIs and internal tools."
 >
+  <LoadingScreen />
   <canvas class="space" data-space aria-hidden="true"></canvas>
   <div class="space-fallback" aria-hidden="true"></div>
   <Header />

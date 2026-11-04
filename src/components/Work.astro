@@ -2,7 +2,6 @@
 import { getCollection } from 'astro:content';
 
 const projects = (await getCollection('projects')).sort((a, b) => a.data.order - b.data.order);
-const planetHues = [205, 230, 190, 255];
 ---
 
 <section class="work" id="work" data-work aria-labelledby="work-title">
@@ -14,23 +13,19 @@ const planetHues = [205, 230, 190, 255];
       </header>
       {
         projects.map((project, index) => (
-          <article class="card" style={`--hue: ${planetHues[index % planetHues.length]}`}>
+          <article class="card">
             <div class="card__visual" data-card-visual aria-hidden="true">
-              <span class="planet">
-                <span class="planet__ring" />
-              </span>
+              <img src={project.data.image} alt="" loading="lazy" decoding="async" />
             </div>
             <div class="card__body">
               <p class="label">
-                {String(index + 1).padStart(2, '0')} | {project.data.client} | {project.data.year}
+                {String(index + 1).padStart(2, '0')} | {project.data.category}
               </p>
               <h3 class="item-title">{project.data.title}</h3>
               <p class="card__summary">{project.data.summary}</p>
-              <ul class="card__stack" aria-label="Stack">
-                {project.data.stack.map((tech) => (
-                  <li>{tech}</li>
-                ))}
-              </ul>
+              <a class="card__link label" href={project.data.url} target="_blank" rel="noopener noreferrer">
+                Visit website
+              </a>
             </div>
           </article>
         ))
@@ -60,38 +55,23 @@ const planetHues = [205, 230, 190, 255];
   }
 
   .card__visual {
-    display: grid;
-    place-items: center;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 10;
     border: 1px solid var(--color-line);
     border-radius: var(--radius);
-    background:
-      radial-gradient(60% 60% at 50% 50%, hsl(var(--hue) 80% 60% / 0.12), transparent 70%),
-      color-mix(in srgb, var(--color-surface) 70%, transparent);
     overflow: hidden;
   }
 
-  .planet {
-    position: relative;
-    width: 42%;
-    aspect-ratio: 1;
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at 30% 28%, hsl(var(--hue) 90% 85%), hsl(var(--hue) 70% 45%) 45%, hsl(var(--hue) 60% 12%) 100%);
-    box-shadow: 0 0 4rem hsl(var(--hue) 80% 55% / 0.35);
+  .card__visual img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
     transition: transform 0.8s var(--ease-out);
   }
 
-  .planet__ring {
-    position: absolute;
-    inset: 38% -38%;
-    border: 2px solid hsl(var(--hue) 80% 80% / 0.5);
-    border-radius: 50%;
-    transform: rotate(-16deg);
-  }
-
-  .card:hover .planet {
-    transform: scale(1.08) rotate(-6deg);
+  .card:hover .card__visual img {
+    transform: scale(1.04);
   }
 
   .card__body {
@@ -104,21 +84,14 @@ const planetHues = [205, 230, 190, 255];
     max-width: 28rem;
   }
 
-  .card__stack {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-family: var(--font-mono);
-    font-size: var(--text-label);
+  .card__link {
+    justify-self: start;
+    color: var(--color-accent);
+    text-underline-offset: 0.35em;
   }
 
-  .card__stack li {
-    padding: 0.3rem 0.7rem;
-    border: 1px solid var(--color-line);
-    border-radius: 2rem;
+  .card__link:hover {
+    color: var(--color-text);
   }
 
   /* The horizontal strip exists only while its pin runs, so every card stays reachable without it. */
@@ -147,10 +120,6 @@ const planetHues = [205, 230, 190, 255];
     width: min(34rem, 38vw, 70svh);
   }
 
-  :global(.is-horizontal) .card__visual {
-    aspect-ratio: 16 / 10;
-  }
-
   @media (min-width: 900px) {
     .work__track {
       grid-template-columns: repeat(2, 1fr);
@@ -163,7 +132,7 @@ const planetHues = [205, 230, 190, 255];
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .planet {
+    .card__visual img {
       transition: none;
     }
   }

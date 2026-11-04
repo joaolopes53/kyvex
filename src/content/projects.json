@@ -1,38 +1,29 @@
 [
   {
-    "id": "atlas",
-    "title": "Atlas",
-    "client": "Placeholder Logistics",
-    "year": 2026,
-    "summary": "Real-time fleet dashboard that cut dispatch time by a third.",
-    "stack": ["React", "TypeScript", "PostgreSQL"],
+    "id": "violets",
+    "title": "Violets",
+    "category": "Interior design | Madeira",
+    "summary": "A bilingual digital home for bespoke interiors, furniture and decoration by Violets.",
+    "url": "https://violetsdesign.com",
+    "image": "/violets-preview.jpg",
     "order": 1
   },
   {
-    "id": "ledger",
-    "title": "Ledger API",
-    "client": "Placeholder Finance",
-    "year": 2025,
-    "summary": "Payments API serving two million requests a day with zero downtime releases.",
-    "stack": ["Python", "Django", "Redis"],
+    "id": "spearfishing-madeira",
+    "title": "Spearfishing Madeira",
+    "category": "Ocean experiences | Madeira",
+    "summary": "A destination for guided spearfishing, sport fishing and boat trips around Madeira.",
+    "url": "https://spearfishingmadeira.com",
+    "image": "/spearfishing-preview.jpg",
     "order": 2
   },
   {
-    "id": "harbor",
-    "title": "Harbor",
-    "client": "Placeholder Hotels",
-    "year": 2025,
-    "summary": "Booking platform rebuilt from scratch, now loading in under a second.",
-    "stack": ["Astro", "Node.js", "Docker"],
+    "id": "arango",
+    "title": "Arango",
+    "category": "Steel structures | Madeira",
+    "summary": "A bilingual company site presenting Arango’s reinforcing-steel services and construction work.",
+    "url": "https://arango.vercel.app",
+    "image": "/arango-preview.jpg",
     "order": 3
-  },
-  {
-    "id": "pulse",
-    "title": "Pulse",
-    "client": "Placeholder Health",
-    "year": 2024,
-    "summary": "Internal tool that replaced four spreadsheets and a weekly meeting.",
-    "stack": ["Next.js", "Prisma", "Azure"],
-    "order": 4
   }
 ]

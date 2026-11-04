@@ -6,10 +6,10 @@ const projects = defineCollection({
   loader: file('src/content/projects.json'),
   schema: z.object({
     title: z.string(),
-    client: z.string(),
-    year: z.number().int(),
+    category: z.string(),
     summary: z.string(),
-    stack: z.array(z.string()).min(1),
+    url: z.string().url(),
+    image: z.string().startsWith('/'),
     order: z.number().int(),
   }),
 });

@@ -1,9 +1,9 @@
 <section class="hero" id="top" data-hero aria-labelledby="hero-title">
   <div class="hero__sticky">
     <div class="hero__copy container" data-hero-copy>
-      <p class="label">Kyvex | Software studio</p>
-      <h1 class="hero__title" id="hero-title">Software with its own <em>gravity</em>.</h1>
-      <p class="hero__lead">
+      <p class="label" data-hero-label>Kyvex | Software studio</p>
+      <h1 class="hero__title" id="hero-title" data-hero-title>Software with its own <em>gravity</em>.</h1>
+      <p class="hero__lead" data-hero-lead>
         Two developers, one orbit. We design and build web platforms, APIs and internal tools for teams that care
         about the details.
       </p>
@@ -23,14 +23,15 @@
     top: 0;
     height: 100svh;
     display: grid;
-    align-items: end;
+    place-items: center;
   }
 
   .hero__copy {
     display: grid;
     gap: 1.5rem;
-    padding-bottom: clamp(3rem, 10svh, 7rem);
     max-width: 68rem;
+    text-align: center;
+    justify-items: center;
   }
 
   .hero__title {
@@ -39,6 +40,11 @@
     font-size: var(--text-display);
     line-height: 1;
     letter-spacing: -0.04em;
+  }
+
+  :global(.hero__title .split-line) {
+    padding-bottom: 0.24em;
+    margin-bottom: -0.16em;
   }
 
   .hero__title em {

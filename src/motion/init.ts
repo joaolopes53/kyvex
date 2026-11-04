@@ -64,6 +64,31 @@ function trackJourney({ onHeroProgress, onJourneyProgress, onFinaleProgress }: M
   });
 }
 
+function revealHero(): void {
+  const label = document.querySelector<HTMLElement>('[data-hero-label]');
+  const title = document.querySelector<HTMLElement>('[data-hero-title]');
+  const lead = document.querySelector<HTMLElement>('[data-hero-lead]');
+  if (!label || !title || !lead) return;
+
+  SplitText.create(title, {
+    type: 'lines',
+    mask: 'lines',
+    linesClass: 'split-line',
+    autoSplit: true,
+    onSplit: (split) => {
+      const timeline = gsap.timeline();
+      timeline.from(label, { y: 12, autoAlpha: 0, duration: 0.45, ease: 'expo.out' }, 0);
+      timeline.from(
+        split.lines,
+        { yPercent: 110, autoAlpha: 0, duration: 0.9, stagger: 0.1, ease: 'expo.out' },
+        0.1,
+      );
+      timeline.from(lead, { y: 14, autoAlpha: 0, duration: 0.65, ease: 'expo.out' }, 0.72);
+      return timeline;
+    },
+  });
+}
+
 function revealLines(): void {
   gsap.utils.toArray<HTMLElement>('[data-reveal-lines]').forEach((element) => {
     SplitText.create(element, {
@@ -163,6 +188,7 @@ export function initMotion(options: MotionOptions): () => void {
   media.add(FULL_MOTION, () => {
     const stopSmoothScroll = startSmoothScroll();
     trackJourney(options);
+    revealHero();
     revealLines();
     revealWords();
     revealFades();
