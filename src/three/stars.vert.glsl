@@ -18,11 +18,7 @@ varying float vAlpha;
 varying float vHalo;
 
 void main() {
-  // Word stars are stored in the galaxy's local frame; inner stars orbit faster, which keeps the arms winding.
-  float radius = length(position.xz);
-  float angle = uTime * 0.18 / (0.35 + radius);
-  vec3 orbit = vec3(cos(angle) * position.x - sin(angle) * position.z, position.y, sin(angle) * position.x + cos(angle) * position.z);
-  vec3 start = mix(position, (uGalaxy * vec4(orbit, 1.0)).xyz, aWord);
+  vec3 start = mix(position, (uGalaxy * vec4(position, 1.0)).xyz, aWord);
 
   // Each word star starts its flight at a different moment, so the letters assemble instead of snapping.
   float morph = aWord * smoothstep(0.0, 1.0, clamp(uMorph * 1.6 - aRandom * 0.6, 0.0, 1.0));

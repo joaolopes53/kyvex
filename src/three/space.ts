@@ -62,7 +62,7 @@ const WORD_COLOUR = rgb(0x8db8ff);
 const GALAXY_RADIUS = 6;
 const GALAXY_ARMS = 3;
 const GALAXY_SPIN = 1.1;
-const GALAXY_TILT = 1;
+const GALAXY_TILT = 0.55;
 const GALAXY_CENTRE = new Vector3(0, 0, -TRAVEL - WORD_DISTANCE - 4);
 const GALAXY_CORE = rgb(0xfff4ea);
 const GALAXY_ARM = rgb(0xaabfff);
@@ -290,7 +290,7 @@ export function mountSpace({ canvas, onLost }: SpaceOptions): SpaceScene | null 
     const sway = 1 - finale * 0.9;
 
     camera.position.set(0, 0, -(HERO_TRAVEL * hero + (TRAVEL - HERO_TRAVEL) * current.journey));
-    camera.rotation.set(pointer.y * 0.05 * sway, -pointer.x * 0.08 * sway, Math.sin(current.journey * Math.PI) * 0.25);
+    camera.rotation.set(pointer.y * 0.05 * sway, -pointer.x * 0.08 * sway, Math.sin(current.journey * Math.PI) * 0.05);
     camera.updateMatrixWorld();
     sky.position.copy(camera.position);
 
